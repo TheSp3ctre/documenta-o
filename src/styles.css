@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -59,12 +60,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-paper: var(--paper);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-sage-medium: var(--sage-medium);
+  --color-forest: var(--forest);
+  --color-code-bg: var(--code-bg);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 0.5rem;
+  /* Sustainability palette */
+  --background: oklch(1 0 0);                          /* #FFFFFF */
+  --paper: oklch(0.987 0.005 120);                     /* #FAFBF9 */
+  --foreground: oklch(0.215 0.012 145);                /* #1A1F1C */
+  --muted-fg: oklch(0.508 0.022 145);                  /* #5A6B5E */
+  --sage: oklch(0.927 0.012 145);                      /* #E5EBE6 border */
+  --sage-soft: oklch(0.92 0.05 145);                   /* #D4EDD8 hover */
+  --sage-medium: oklch(0.78 0.12 145);                 /* #7BC088 */
+  --forest: oklch(0.42 0.09 145);                      /* #2D6A3E */
+  --code-bg: oklch(0.975 0.012 140);                   /* #F5F7F4 */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
