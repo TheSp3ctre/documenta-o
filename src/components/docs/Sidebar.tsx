@@ -1,19 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Search, Leaf, Moon, Sun, ChevronDown, BookOpen, Compass, Lightbulb, GitBranch, X, Menu } from "lucide-react";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 type NavItem = { label: string; href: string; active?: boolean };
 type NavSection = { title: string; icon: React.ComponentType<{ className?: string }>; items: NavItem[]; defaultOpen?: boolean };
 
-const sections: NavSection[] = [
+export const sections: NavSection[] = [
   {
     title: "Documentação",
     icon: BookOpen,
@@ -63,32 +54,11 @@ function Section({ section }: { section: NavSection }) {
 interface DocsSidebarProps {
   open: boolean;
   onClose: () => void;
+  onSearchOpen: () => void;
 }
 
-export function DocsSidebar({ open, onClose }: DocsSidebarProps) {
+export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
   const [isDark, setIsDark] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
-
-  const filteredSections = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    if (!term) return sections;
-    
-    return sections.map(section => ({
-      ...section,
-      items: section.items.filter(item => 
-        item.label.toLowerCase().includes(term) || 
-        section.title.toLowerCase().includes(term)
-      )
-    })).filter(section => section.items.length > 0);
-  }, [searchTerm]);
-
-  const onSelect = (href: string) => {
-    navigate({ to: href as any });
-    setSearchOpen(false);
-    onClose();
-  };
 
   useEffect(() => {
     const stored = localStorage.getItem("verdant-theme");
@@ -137,39 +107,13 @@ export function DocsSidebar({ open, onClose }: DocsSidebarProps) {
         {/* Search */}
         <div className="px-4 pt-4 pb-2">
           <button
-            onClick={() => setSearchOpen(true)}
+            onClick={onSearchOpen}
             className="flex w-full items-center gap-2 rounded-lg border border-sage bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-sage-soft/50 hover:text-forest transition-all"
           >
             <Search className="h-3.5 w-3.5" />
             <span>Pesquisar...</span>
           </button>
         </div>
-
-        {/* Search Modal */}
-        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <CommandInput 
-            placeholder="Digite para pesquisar..." 
-            value={searchTerm}
-            onValueChange={setSearchTerm}
-          />
-          <CommandList>
-            <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-            {filteredSections.map((section) => (
-              <CommandGroup key={section.title} heading={section.title}>
-                {section.items.map((item) => (
-                  <CommandItem
-                    key={item.href}
-                    onSelect={() => onSelect(item.href)}
-                    className="cursor-pointer"
-                  >
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
-          </CommandList>
-        </CommandDialog>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-4">
