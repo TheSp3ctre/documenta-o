@@ -83,22 +83,9 @@ interface DocsSidebarProps {
 }
 
 export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
-  const [isDark, setIsDark] = useState(false);
-
   useEffect(() => {
-    const stored = localStorage.getItem("verdant-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const dark = stored ? stored === "dark" : prefersDark;
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.classList.add("dark");
   }, []);
-
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("verdant-theme", next ? "dark" : "light");
-  };
 
   return (
     <>
@@ -148,13 +135,6 @@ export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
         {/* Footer */}
         <div className="border-t border-sage px-4 py-3 flex items-center justify-between">
           <span className="text-[11px] text-muted-foreground">© DOCUMENTAÇÃO</span>
-          <button
-            onClick={toggleTheme}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-sage-soft hover:text-forest dark:hover:text-sage-medium transition-colors"
-            aria-label="Toggle theme"
-          >
-            {isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-          </button>
         </div>
       </aside>
     </>
