@@ -1,101 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, ChevronDown, BookOpen, Compass, GitBranch, X, Menu } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { getDocSections, NavSection } from "@/lib/docs";
 
-type NavItem = { label: string; href: string };
-type NavSection = { title: string; icon: React.ComponentType<{ className?: string }>; items: NavItem[]; defaultOpen?: boolean };
-
-export const sections: NavSection[] = [
-  {
-    title: "Documentação",
-    icon: BookOpen,
-    defaultOpen: true,
-    items: [
-      { label: "Introdução", href: "/" },
-      { label: "Visão Geral", href: "/docs/visao-geral" },
-      { label: "O Problema", href: "/docs/problema" },
-      { label: "A Solução", href: "/docs/solucao" },
-      { label: "O Projeto", href: "/docs/projeto" },
-      { label: "Tecnologias", href: "/docs/stack" },
-    ],
-  },
-  {
-    title: "Arquitetura",
-    icon: GitBranch,
-    defaultOpen: true,
-    items: [
-      { label: "Arquitetura Geral", href: "/docs/arq-geral" },
-      { label: "Detalhes Técnicos", href: "/docs/arq-detalhes" },
-      { label: "Banco de Dados", href: "/docs/banco-de-dados" },
-      { label: "Microflows", href: "/docs/microflows" },
-    ],
-  },
-  {
-    title: "Integrações & UI",
-    icon: Compass,
-    defaultOpen: true,
-    items: [
-      { label: "Integrações", href: "/docs/integracoes" },
-      { label: "Interface", href: "/docs/interface" },
-    ],
-  },
-];
-
-function Section({ section }: { section: NavSection }) {
+export function DocsSidebar({ open, onClose, onSearchOpen }: { open: boolean; onClose: () => void; onSearchOpen: () => void }) {
   const location = useLocation();
-  const isActive = (href: string) => location.pathname === href;
-  const hasActiveItem = section.items.some(item => isActive(item.href));
-  
-  const [open, setOpen] = useState(section.defaultOpen || hasActiveItem);
-  const Icon = section.icon;
 
-  // Sync open state if an item becomes active (e.g. from search)
-  useEffect(() => {
-    if (hasActiveItem) setOpen(true);
-  }, [hasActiveItem]);
+  // Organize files into sections
+  const sections = useMemo(() => {
+    const rawSections = getDocSections();
+    // Add icons to sections
+    return rawSections.map(s => ({
+      ...s,
+      icon: s.title === "Documentação" ? BookOpen : s.title === "Arquitetura" ? GitBranch : Compass
+    })) as NavSection[];
+  }, []);
 
-  return (
-    <div className="mb-1">
-      <button
-        onClick={() => setOpen(!open)}
-        className="group flex w-full items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-forest dark:hover:text-sage-medium transition-colors"
-      >
-        <Icon className="h-3 w-3 opacity-60" />
-        <span className="flex-1 text-left">{section.title}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? "" : "-rotate-90"}`} />
-      </button>
-      {open && (
-        <ul className="relative ml-4 mt-1 border-l border-sage">
-          {section.items.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <li key={item.label} className="relative">
-                <Link
-                  to={item.href}
-                  className={`relative -ml-px flex items-center px-4 py-2 text-sm transition-all duration-150 ${
-                    active
-                      ? "border-l-2 border-primary bg-sage-soft/60 font-medium text-forest dark:text-sage-medium"
-                      : "border-l-2 border-transparent text-foreground hover:bg-sage-soft/50 hover:text-forest dark:hover:text-sage-medium"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-interface DocsSidebarProps {
-  open: boolean;
-  onClose: () => void;
-  onSearchOpen: () => void;
-}
-
-export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
@@ -144,7 +64,9 @@ export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-4">
-          {sections.map((s) => <Section key={s.title} section={s} />)}
+          {sections.map((s) => (
+            <Section key={s.title} section={s} currentPath={location.pathname} />
+          ))}
         </nav>
 
         {/* Footer */}
@@ -153,6 +75,48 @@ export function DocsSidebar({ open, onClose, onSearchOpen }: DocsSidebarProps) {
         </div>
       </aside>
     </>
+  );
+}
+
+function Section({ section, currentPath }: { section: NavSection; currentPath: string }) {
+  const isActive = (href: string) => currentPath === href;
+  const hasActiveItem = section.items.some(item => isActive(item.href));
+  const [open, setOpen] = useState(section.defaultOpen || hasActiveItem);
+  const Icon = section.icon;
+
+  useEffect(() => {
+    if (hasActiveItem) setOpen(true);
+  }, [hasActiveItem]);
+
+  return (
+    <div className="mb-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="group flex w-full items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-forest dark:hover:text-sage-medium transition-colors"
+      >
+        <Icon className="h-3 w-3 opacity-60" />
+        <span className="flex-1 text-left">{section.title}</span>
+        <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? "" : "-rotate-90"}`} />
+      </button>
+      {open && (
+        <ul className="relative ml-4 mt-1 border-l border-sage">
+          {section.items.map((item) => (
+            <li key={item.href} className="relative">
+              <Link
+                to={item.href}
+                className={`relative -ml-px flex items-center px-4 py-2 text-sm transition-all duration-150 ${
+                  isActive(item.href)
+                    ? "border-l-2 border-primary bg-sage-soft/60 font-medium text-forest dark:text-sage-medium"
+                    : "border-l-2 border-transparent text-foreground hover:bg-sage-soft/50 hover:text-forest dark:hover:text-sage-medium"
+                }`}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -167,4 +131,5 @@ export function MobileMenuButton({ onClick }: { onClick: () => void }) {
     </button>
   );
 }
+
 

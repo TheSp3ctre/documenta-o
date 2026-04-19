@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, Outlet } from "@tanstack/react-router";
-import { DocsSidebar, MobileMenuButton, sections } from "@/components/docs/Sidebar";
+import { DocsSidebar, MobileMenuButton } from "@/components/docs/Sidebar";
+import { getDocSections } from "@/lib/docs";
 import { BookOpen } from "lucide-react";
 import {
   CommandDialog,
@@ -22,6 +23,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
   const navigate = useNavigate();
 
   const filteredSections = useMemo(() => {
+    const sections = getDocSections();
     const term = searchTerm.toLowerCase();
     if (!term) return sections;
     
